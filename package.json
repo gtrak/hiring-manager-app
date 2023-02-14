@@ -10,6 +10,8 @@
     "db:clean": "rm local/candidates.sqlite"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.10",
+    "@heroicons/react": "^2.0.15",
     "@testing-library/react": "^13.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
