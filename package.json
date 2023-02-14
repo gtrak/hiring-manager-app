@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "server": "ts-node --project tsconfig.node.json src/server.ts"
+    "server": "ts-node --project tsconfig.node.json src/server.ts",
+    "db:clean": "rm local/candidates.sqlite"
   },
   "dependencies": {
     "@testing-library/react": "^13.4.0",
