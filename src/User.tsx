@@ -1,6 +1,6 @@
 import React, { PropsWithChildren, useEffect, useState } from "react";
-import { useQuery } from "react-query";
-import { newCandidate } from "./api";
+import { useQuery, useQueryClient } from "react-query";
+import { newCandidate, saveCandidate, WithDetail } from "./api";
 
 export const mockResponse = {
   results: [
@@ -79,10 +79,36 @@ const Chip: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 /* TODO: check if any of these fields are optional */
-const UserInfo: React.FC<UserInfo> = ({ name, contact, picture }) => {
+const UserInfo: React.FC<WithDetail> = ({ candidate, detail }) => {
+  const queryClient = useQueryClient();
+  const { name, contact, picture } = responseInfo(detail);
+
+  const save = (status: "accepted" | "rejected") => {
+    saveCandidate({ ...candidate, status }).then(() =>
+      Promise.all([
+        queryClient.invalidateQueries("candidates"),
+        queryClient.refetchQueries("candidate"),
+      ])
+    );
+  };
+
   return (
     /* This is just a modified tailwind card example */
     <div className="max-w-sm rounded overflow-hidden shadow-lg">
+      <div className="flex my-4">
+        <button
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 flex-grow"
+          onClick={() => save("accepted")}
+        >
+          Accept
+        </button>
+        <button
+          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 flex-grow"
+          onClick={() => save("rejected")}
+        >
+          Reject
+        </button>
+      </div>
       <img
         className="w-64 mx-auto"
         src={picture}
@@ -117,7 +143,9 @@ const User: React.FC = () => {
   return status !== "success" ? (
     <div>Loading</div>
   ) : (
-    <UserInfo {...responseInfo(data!.detail)} />
+    <div>
+      <UserInfo {...data!} />
+    </div>
   );
 };
 

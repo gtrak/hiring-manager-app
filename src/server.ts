@@ -95,7 +95,7 @@ router.post("/candidate", async (ctx) => {
     (resolve, reject) => {
       db.all(
         `INSERT INTO candidates (id, first_name, last_name, email, phone, status, note, seed)
-     VALUES(?)
+     VALUES(?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT (id)
      DO UPDATE SET
      first_name = excluded.first_name,
@@ -111,7 +111,7 @@ router.post("/candidate", async (ctx) => {
       );
     }
   );
-  return candidateById(db, insert![0].id);
+  ctx.response.body = await candidateById(db, insert![0].id);
 });
 
 export const responseInfo = ({
@@ -123,8 +123,8 @@ export const responseInfo = ({
 }): UserModel => {
   const candidate = results[0];
   return {
-    first_name: candidate.name.first_name,
-    last_name: candidate.name.last_name,
+    first_name: candidate.name.first,
+    last_name: candidate.name.last,
     email: candidate.email,
     phone: candidate.phone,
     status: "New",
