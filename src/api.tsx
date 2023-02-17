@@ -15,7 +15,7 @@ export interface WithDetail {
 
 const server = document.baseURI;
 
-export const candidateByID = async (id: number) => {
+export const candidateById = async (id: number) => {
   const res = await fetch(new URL(`/api/candidate/${id}`, server));
   return res.json();
 };

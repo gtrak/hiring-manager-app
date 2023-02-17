@@ -164,7 +164,10 @@ router.get("/candidate", async (ctx) => {
   const db = ctx.db;
   ctx.response.body = {
     items: await new Promise<UserModel[] | undefined>((resolve, reject) => {
-      db.all(`select * from candidates`, sqliteCb(resolve, reject));
+      db.all(
+        `select * from candidates order by id desc`,
+        sqliteCb(resolve, reject)
+      );
     }),
   };
 });

@@ -1,7 +1,5 @@
 import { useQuery } from "react-query";
-import { UserModel, candidates } from "./api";
-
-const users: UserModel[] = [];
+import { candidates } from "./api";
 
 const UserList: React.FC = () => {
   const { status, data, error, isFetching } = useQuery(

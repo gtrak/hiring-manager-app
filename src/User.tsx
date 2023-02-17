@@ -1,6 +1,12 @@
-import React, { PropsWithChildren, useEffect, useState } from "react";
+import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
-import { newCandidate, saveCandidate, WithDetail } from "./api";
+import {
+  candidateByID,
+  candidateById,
+  newCandidate,
+  saveCandidate,
+  WithDetail,
+} from "./api";
 
 export const mockResponse = {
   results: [
@@ -79,17 +85,22 @@ const Chip: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 /* TODO: check if any of these fields are optional */
-const UserInfo: React.FC<WithDetail> = ({ candidate, detail }) => {
+const UserInfo: React.FC<WithDetail & { clearId: () => void }> = ({
+  candidate,
+  detail,
+  clearId,
+}) => {
   const queryClient = useQueryClient();
   const { name, contact, picture } = responseInfo(detail);
 
   const save = (status: "accepted" | "rejected") => {
-    saveCandidate({ ...candidate, status }).then(() =>
-      Promise.all([
+    saveCandidate({ ...candidate, status }).then(() => {
+      clearId();
+      return Promise.all([
         queryClient.invalidateQueries("candidates"),
         queryClient.refetchQueries("candidate"),
-      ])
-    );
+      ]);
+    });
   };
 
   return (
@@ -126,12 +137,27 @@ const UserInfo: React.FC<WithDetail> = ({ candidate, detail }) => {
   );
 };
 
-const User: React.FC = () => {
+const User: React.FC<{ id: number | undefined; clearId: () => void }> = ({
+  id,
+  clearId,
+}) => {
   const [loaded, setLoaded] = useState(false);
-  const { status, data, error, refetch } = useQuery("candidate", newCandidate, {
-    /* Don't automatically reload, since the URL is the same for multiple candidates */
-    enabled: false,
-  });
+  const prevId = useRef<number>();
+  const { status, data, error, refetch } = useQuery(
+    ["candidate", id],
+    ({ queryKey }) => {
+      const [_, id] = queryKey;
+      if (id) {
+        return candidateById(id as number);
+      } else {
+        return newCandidate();
+      }
+    },
+    {
+      /* Don't automatically reload, since the URL is the same for multiple candidates */
+      enabled: false,
+    }
+  );
   if (error) {
     console.error(error);
   }
@@ -140,11 +166,18 @@ const User: React.FC = () => {
       refetch().then(setLoaded.bind(null, true));
     }
   }, [loaded, status]);
+  useEffect(() => {
+    if (id !== prevId.current) {
+      prevId.current = id;
+      refetch().then(setLoaded.bind(null, true));
+    }
+  }, [id]);
+
   return status !== "success" ? (
     <div>Loading</div>
   ) : (
     <div>
-      <UserInfo {...data!} />
+      <UserInfo clearId={clearId} {...data!} />
     </div>
   );
 };
