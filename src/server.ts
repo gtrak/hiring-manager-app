@@ -154,9 +154,11 @@ router.get("/candidate/:id", async (ctx) => {
   );
   ctx.response.body = {
     candidate,
-    detail: await (
-      await fetch(`https:/randomuser.me/api/?seed=${candidate!.seed}`)
-    ).json(),
+    detail: (
+      await (
+        await fetch(`https:/randomuser.me/api/?seed=${candidate!.seed}`)
+      ).json()
+    ).results[0],
   };
 });
 

@@ -1,7 +1,7 @@
 import { useQuery } from "react-query";
 import { candidates } from "./api";
 
-const UserList: React.FC = () => {
+const UserList: React.FC<{ setId: (id: number) => void }> = ({ setId }) => {
   const { status, data, error, isFetching } = useQuery(
     "candidates",
     candidates
@@ -16,7 +16,7 @@ const UserList: React.FC = () => {
       : data!.items.map(
           ({ id, first_name, last_name, email, phone, status, note }) => {
             return (
-              <tr key={id || email}>
+              <tr key={id} onClick={() => setId(id!)}>
                 <td>
                   {first_name} {last_name}
                 </td>

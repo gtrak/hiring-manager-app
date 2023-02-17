@@ -15,7 +15,7 @@ const App: React.FC = () => {
         <User id={id} clearId={() => setId(undefined)} />
       </div>
       <div className="mx-auto">
-        <UserList />
+        <UserList setId={setId} />
       </div>
     </div>
   );

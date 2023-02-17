@@ -141,8 +141,8 @@ const User: React.FC<{ id: number | undefined; clearId: () => void }> = ({
   id,
   clearId,
 }) => {
-  const [loaded, setLoaded] = useState(false);
-  const prevId = useRef<number>();
+  /* Setting a fake id takes care of initial load */
+  const prevId = useRef<number | undefined>(-1);
   const { status, data, error, refetch } = useQuery(
     ["candidate", id],
     ({ queryKey }) => {
@@ -161,15 +161,11 @@ const User: React.FC<{ id: number | undefined; clearId: () => void }> = ({
   if (error) {
     console.error(error);
   }
-  useEffect(() => {
-    if (status !== "loading" && !loaded) {
-      refetch().then(setLoaded.bind(null, true));
-    }
-  }, [loaded, status]);
+  /* TODO: make both id and not ID state work */
   useEffect(() => {
     if (id !== prevId.current) {
       prevId.current = id;
-      refetch().then(setLoaded.bind(null, true));
+      refetch();
     }
   }, [id]);
 
