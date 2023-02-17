@@ -1,4 +1,6 @@
-import React, { PropsWithChildren } from "react";
+import React, { PropsWithChildren, useEffect, useState } from "react";
+import { useQuery } from "react-query";
+import { newCandidate } from "./api";
 
 export const mockResponse = {
   results: [
@@ -77,7 +79,7 @@ const Chip: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 /* TODO: check if any of these fields are optional */
-const User: React.FC<UserInfo> = ({ name, contact, picture }) => {
+const UserInfo: React.FC<UserInfo> = ({ name, contact, picture }) => {
   return (
     /* This is just a modified tailwind card example */
     <div className="max-w-sm rounded overflow-hidden shadow-lg">
@@ -95,6 +97,27 @@ const User: React.FC<UserInfo> = ({ name, contact, picture }) => {
         <Chip>email: {contact.email}</Chip>
       </div>
     </div>
+  );
+};
+
+const User: React.FC = () => {
+  const [loaded, setLoaded] = useState(false);
+  const { status, data, error, refetch } = useQuery("candidate", newCandidate, {
+    /* Don't automatically reload, since the URL is the same for multiple candidates */
+    enabled: false,
+  });
+  if (error) {
+    console.error(error);
+  }
+  useEffect(() => {
+    if (status !== "loading" && !loaded) {
+      refetch().then(setLoaded.bind(null, true));
+    }
+  }, [loaded, status]);
+  return status !== "success" ? (
+    <div>Loading</div>
+  ) : (
+    <UserInfo {...responseInfo(data!.detail)} />
   );
 };
 

@@ -114,26 +114,6 @@ router.post("/candidate", async (ctx) => {
   return candidateById(db, insert![0].id);
 });
 
-router.get("/candidate/:id", async (ctx) => {
-  const db = ctx.db;
-
-  const candidate: UserModel | undefined = await new Promise(
-    (resolve, reject) => {
-      db.get(
-        `select * from candidates where id = ?`,
-        [ctx.params.id],
-        sqliteCb(resolve, reject)
-      );
-    }
-  );
-  ctx.response.body = {
-    candidate,
-    detail: await (
-      await fetch(`https:/randomuser.me/api/?seed=${candidate!.seed}`)
-    ).json(),
-  };
-});
-
 export const responseInfo = ({
   results,
   info,
@@ -157,6 +137,26 @@ router.get("/candidate/new", async (ctx) => {
   ctx.response.body = {
     candidate: responseInfo(randomUser),
     detail: randomUser.results[0],
+  };
+});
+
+router.get("/candidate/:id", async (ctx) => {
+  const db = ctx.db;
+
+  const candidate: UserModel | undefined = await new Promise(
+    (resolve, reject) => {
+      db.get(
+        `select * from candidates where id = ?`,
+        [ctx.params.id],
+        sqliteCb(resolve, reject)
+      );
+    }
+  );
+  ctx.response.body = {
+    candidate,
+    detail: await (
+      await fetch(`https:/randomuser.me/api/?seed=${candidate!.seed}`)
+    ).json(),
   };
 });
 

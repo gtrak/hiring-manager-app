@@ -12,7 +12,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <QueryClientProvider client={queryClient}>
       <div className="flex flex-wrap">
         <div className="mx-auto">
-          <User {...responseInfo(mockResult)} />
+          <User />
         </div>
         <div className="mx-auto">
           <UserList />

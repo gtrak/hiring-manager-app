@@ -20,7 +20,7 @@ export const candidateByID = async (id: number) => {
   return res.json();
 };
 
-export const newCandidate = async () => {
+export const newCandidate = async (): Promise<WithDetail> => {
   const res = await fetch(new URL("/api/candidate/new", server));
   return res.json();
 };
