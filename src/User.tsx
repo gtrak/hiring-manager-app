@@ -1,12 +1,4 @@
-import React from "react";
-
-interface UserModel {
-  id?: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  note?: string;
-}
+import React, { PropsWithChildren } from "react";
 
 export const mockResponse = {
   results: [
@@ -72,20 +64,36 @@ export const responseInfo = (candidate: typeof mockResult): UserInfo => {
       phone: candidate.phone,
       cell: candidate.cell,
     },
-    picture: candidate.picture.medium,
+    picture: candidate.picture.large,
   };
+};
+
+const Chip: React.FC<PropsWithChildren> = ({ children }) => {
+  return (
+    <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+      {children}
+    </span>
+  );
 };
 
 /* TODO: check if any of these fields are optional */
 const User: React.FC<UserInfo> = ({ name, contact, picture }) => {
   return (
-    <div>
-      <div>
-        {name.first} {name.last}
+    /* This is just a modified tailwind card example */
+    <div className="max-w-sm rounded overflow-hidden shadow-lg">
+      <img
+        className="w-64 mx-auto"
+        src={picture}
+        alt="Sunset in the mountains"
+      />
+      <div className="px-6 pt-4 pb-2">
+        <Chip>
+          {name.first} {name.last}
+        </Chip>
+        <Chip>cell: {contact.cell}</Chip>
+        <Chip>phone: {contact.phone}</Chip>
+        <Chip>email: {contact.email}</Chip>
       </div>
-      <div>{contact.email}</div>
-      <div>{contact.cell}</div>
-      <img src={picture} alt="profile photo" />
     </div>
   );
 };
