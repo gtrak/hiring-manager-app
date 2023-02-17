@@ -5,10 +5,7 @@ const UserList: React.FC<{ id?: number; setId: (id: number) => void }> = ({
   id,
   setId,
 }) => {
-  const { status, data, error, isFetching } = useQuery(
-    "candidates",
-    candidates
-  );
+  const { status, data, error } = useQuery("candidates", candidates);
 
   if (error) {
     console.error(error);

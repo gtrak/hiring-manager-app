@@ -1,12 +1,6 @@
 import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "react-query";
-import {
-  candidateByID,
-  candidateById,
-  newCandidate,
-  saveCandidate,
-  WithDetail,
-} from "./api";
+import { candidateById, newCandidate, saveCandidate, WithDetail } from "./api";
 
 export const mockResponse = {
   results: [
@@ -92,10 +86,18 @@ const UserInfo: React.FC<WithDetail & { clearId: () => void }> = ({
 }) => {
   const queryClient = useQueryClient();
   const { name, contact, picture } = responseInfo(detail);
+  const [note, setNote] = useState<string>("");
+
+  /* Sync up existing candidate note */
+  useEffect(() => {
+    /* Undefined value doesn't update the input component */
+    setNote(candidate.note || "");
+  }, [candidate]);
 
   const save = (status: "accepted" | "rejected") => {
-    saveCandidate({ ...candidate, status }).then(() => {
+    saveCandidate({ ...candidate, status, note }).then(() => {
       clearId();
+      setNote("");
       return Promise.all([
         queryClient.invalidateQueries("candidates"),
         queryClient.refetchQueries("candidate"),
@@ -106,19 +108,30 @@ const UserInfo: React.FC<WithDetail & { clearId: () => void }> = ({
   return (
     /* This is just a modified tailwind card example */
     <div className="max-w-sm rounded overflow-hidden shadow-lg">
-      <div className="flex my-4">
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 flex-grow"
-          onClick={() => save("accepted")}
-        >
-          Accept
-        </button>
-        <button
-          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 flex-grow"
-          onClick={() => save("rejected")}
-        >
-          Reject
-        </button>
+      <div className="pt-4">
+        <div className="flex">
+          <button
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 flex-grow"
+            onClick={() => save("accepted")}
+          >
+            Accept
+          </button>
+          <button
+            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 flex-grow"
+            onClick={() => save("rejected")}
+          >
+            Reject
+          </button>
+        </div>
+        <div className="flex">
+          <input
+            className="flex-grow bg-gray-100 border-2 m-2 rounded py-2"
+            type="text"
+            placeholder="Add an optional note"
+            value={note}
+            onChange={(evt) => setNote(evt.target.value)}
+          />
+        </div>
       </div>
       <img
         className="w-64 mx-auto"
