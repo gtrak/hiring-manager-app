@@ -107,17 +107,17 @@ const UserInfo: React.FC<WithDetail & { clearId: () => void }> = ({
 
   return (
     /* This is just a modified tailwind card example */
-    <div className="max-w-sm rounded overflow-hidden shadow-lg">
+    <div className="w-[400px] rounded overflow-hidden shadow-lg">
       <div className="pt-4">
         <div className="flex">
           <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 flex-grow"
+            className="bg-teal-500 hover:bg-blue-700 text-white font-bold py-2 px-4 flex-grow"
             onClick={() => save("accepted")}
           >
             Accept
           </button>
           <button
-            className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 flex-grow"
+            className="bg-rose-500 hover:bg-red-700 text-white font-bold py-2 px-4 flex-grow"
             onClick={() => save("rejected")}
           >
             Reject
@@ -125,7 +125,7 @@ const UserInfo: React.FC<WithDetail & { clearId: () => void }> = ({
         </div>
         <div className="flex">
           <input
-            className="flex-grow bg-gray-100 border-2 m-2 rounded py-2"
+            className="flex-grow bg-gray-100 border-2 m-2 rounded py-2 px-2"
             type="text"
             placeholder="Add an optional note"
             value={note}
@@ -183,7 +183,8 @@ const User: React.FC<{ id: number | undefined; clearId: () => void }> = ({
   }, [id]);
 
   return status !== "success" ? (
-    <div>Loading</div>
+    /* Hardcoded a size to prevent loading flash */
+    <div className="w-[400px] h-[504px]">Loading</div>
   ) : (
     <div>
       <UserInfo clearId={clearId} {...data!} />

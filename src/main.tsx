@@ -11,10 +11,10 @@ const App: React.FC = () => {
   const [id, setId] = useState<number>();
   return (
     <div className="flex flex-wrap">
-      <div className="mx-auto">
+      <div className="mx-2">
         <User id={id} clearId={() => setId(undefined)} />
       </div>
-      <div className="mx-auto">
+      <div className="mx-2">
         <UserList id={id} setId={setId} />
       </div>
     </div>
