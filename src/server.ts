@@ -163,7 +163,7 @@ router.get("/candidate/new", async (ctx) => {
 router.get("/candidate", async (ctx) => {
   const db = ctx.db;
   ctx.response.body = {
-    items: await new Promise<UserModel | undefined>((resolve, reject) => {
+    items: await new Promise<UserModel[] | undefined>((resolve, reject) => {
       db.all(`select * from candidates`, sqliteCb(resolve, reject));
     }),
   };
