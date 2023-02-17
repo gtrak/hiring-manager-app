@@ -1,53 +1,35 @@
-import { UserModel } from "./api";
+import { useQuery } from "react-query";
+import { UserModel, candidates } from "./api";
 
-const users: UserModel[] = [
-  {
-    first_name: "Gary",
-    last_name: "Trakhman",
-    email: "gary.trakhman@gmail.com",
-    phone: "4044571917",
-    status: "Approved",
-    note: "Great candidate",
-  },
-  {
-    first_name: "first",
-    last_name: "last",
-    email: "test2@test.com",
-    phone: "4044571917",
-    status: "Approved",
-  },
-  {
-    first_name: "first",
-    last_name: "last",
-    email: "test3@test.com",
-    phone: "4044571917",
-    status: "Approved",
-  },
-  {
-    first_name: "first",
-    last_name: "last",
-    email: "test4@test.com",
-    phone: "4044571917",
-    status: "Approved",
-  },
-];
+const users: UserModel[] = [];
 
 const UserList: React.FC = () => {
-  const rows = users.map(
-    ({ id, first_name, last_name, email, phone, status, note }) => {
-      return (
-        <tr key={id || email}>
-          <td>
-            {first_name} {last_name}
-          </td>
-          <td>{email}</td>
-          <td>{phone}</td>
-          <td>{status}</td>
-          <td>{note}</td>
-        </tr>
-      );
-    }
+  const { status, data, error, isFetching } = useQuery(
+    "candidates",
+    candidates
   );
+
+  if (error) {
+    console.error(error);
+  }
+  const rows =
+    status !== "success"
+      ? "Loading"
+      : data!.items.map(
+          ({ id, first_name, last_name, email, phone, status, note }) => {
+            return (
+              <tr key={id || email}>
+                <td>
+                  {first_name} {last_name}
+                </td>
+                <td>{email}</td>
+                <td>{phone}</td>
+                <td>{status}</td>
+                <td>{note}</td>
+              </tr>
+            );
+          }
+        );
   return (
     <div className="max-w-sm rounded overflow-hidden shadow-lg">
       <table className="table-auto">
