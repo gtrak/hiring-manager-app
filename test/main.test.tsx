@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import UserList from "../src/UserList";
-import { render, screen } from "@testing-library/react";
+import User from "../src/User";
+import { findByText, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import {
   ContextOptions,
@@ -70,6 +71,107 @@ vi.mock("../src/api", async (importOriginal) => {
         ],
       };
     },
+    newCandidate: () => {
+      return {
+        candidate: {
+          first_name: "Jeff",
+          last_name: "Hudson",
+          email: "jeffnew.hudson@example.com",
+          phone: "031-933-0120",
+          status: "New",
+          seed: "9f6fdcd547e5409b",
+        },
+        detail: {
+          gender: "male",
+          name: { title: "Mr", first: "Jeff", last: "Hudson" },
+          location: {
+            street: { number: 8302, name: "The Drive" },
+            city: "Buncrana",
+            state: "Kildare",
+            country: "Ireland",
+            postcode: 77652,
+            coordinates: { latitude: "-1.8541", longitude: "-25.8751" },
+            timezone: {
+              offset: "-7:00",
+              description: "Mountain Time (US & Canada)",
+            },
+          },
+          email: "jeffnew.hudson@example.com",
+          login: {
+            uuid: "772dd26c-a333-4e8a-94ae-e8e85f660230",
+            username: "purpletiger893",
+            password: "drizzt",
+            salt: "Qpll5GOg",
+            md5: "5b4e23eb726dd992c588050ba194b5ee",
+            sha1: "ced008a5c90a51796139176a09d114a99a26bedd",
+            sha256:
+              "cbb155cc32527b3ed66f10cd87da394183fdeba6561129002b4d9d21e9e483cf",
+          },
+          dob: { date: "1974-03-19T09:38:10.791Z", age: 48 },
+          registered: { date: "2021-01-28T01:42:48.928Z", age: 2 },
+          phone: "031-933-0120",
+          cell: "081-455-8613",
+          id: { name: "PPS", value: "6678007T" },
+          picture: {
+            large: "https://randomuser.me/api/portraits/men/50.jpg",
+            medium: "https://randomuser.me/api/portraits/med/men/50.jpg",
+            thumbnail: "https://randomuser.me/api/portraits/thumb/men/50.jpg",
+          },
+          nat: "IE",
+        },
+      };
+    },
+    candidateById: (id: number) => {
+      expect(id).toEqual(5);
+      return {
+        candidate: {
+          first_name: "Jeff",
+          last_name: "Hudson",
+          email: "jeffbyid.hudson@example.com",
+          phone: "031-933-0120",
+          status: "New",
+          seed: "9f6fdcd547e5409b",
+        },
+        detail: {
+          gender: "male",
+          name: { title: "Mr", first: "Jeff", last: "Hudson" },
+          location: {
+            street: { number: 8302, name: "The Drive" },
+            city: "Buncrana",
+            state: "Kildare",
+            country: "Ireland",
+            postcode: 77652,
+            coordinates: { latitude: "-1.8541", longitude: "-25.8751" },
+            timezone: {
+              offset: "-7:00",
+              description: "Mountain Time (US & Canada)",
+            },
+          },
+          email: "jeffbyid.hudson@example.com",
+          login: {
+            uuid: "772dd26c-a333-4e8a-94ae-e8e85f660230",
+            username: "purpletiger893",
+            password: "drizzt",
+            salt: "Qpll5GOg",
+            md5: "5b4e23eb726dd992c588050ba194b5ee",
+            sha1: "ced008a5c90a51796139176a09d114a99a26bedd",
+            sha256:
+              "cbb155cc32527b3ed66f10cd87da394183fdeba6561129002b4d9d21e9e483cf",
+          },
+          dob: { date: "1974-03-19T09:38:10.791Z", age: 48 },
+          registered: { date: "2021-01-28T01:42:48.928Z", age: 2 },
+          phone: "031-933-0120",
+          cell: "081-455-8613",
+          id: { name: "PPS", value: "6678007T" },
+          picture: {
+            large: "https://randomuser.me/api/portraits/men/50.jpg",
+            medium: "https://randomuser.me/api/portraits/med/men/50.jpg",
+            thumbnail: "https://randomuser.me/api/portraits/thumb/men/50.jpg",
+          },
+          nat: "IE",
+        },
+      };
+    },
   };
 });
 
@@ -104,5 +206,42 @@ describe("UserList", () => {
     /* Ensure selected state has changed */
     rerender(<UserList id={28} setId={mockSetId} />);
     expect(holly.closest("tr")?.getAttribute("data-active")).equal("true");
+  });
+});
+
+describe("User", () => {
+  it("renders the User details and reacts to state changes", async () => {
+    const client = testQueryClient();
+
+    let cleared = 0;
+    let { rerender } = renderWithClient(
+      client,
+      <User
+        id={undefined}
+        clearId={() => {
+          cleared++;
+          return;
+        }}
+      />
+    );
+    expect(
+      await screen.findByText(/jeffnew.hudson@example.com/)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Holly/)).not.toBeInTheDocument();
+    expect(cleared).toEqual(0);
+
+    // Force an ID
+    rerender(
+      <User
+        id={5}
+        clearId={() => {
+          cleared++;
+          return;
+        }}
+      />
+    );
+    expect(
+      await screen.findByText(/jeffbyid.hudson@example.com/)
+    ).toBeInTheDocument();
   });
 });

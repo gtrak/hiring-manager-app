@@ -79,10 +79,10 @@ const Chip: React.FC<PropsWithChildren> = ({ children }) => {
 };
 
 /* TODO: check if any of these fields are optional */
-const UserInfo: React.FC<WithDetail & { clearId: () => void }> = ({
+const UserInfo: React.FC<WithDetail & { onSave: () => void }> = ({
   candidate,
   detail,
-  clearId,
+  onSave,
 }) => {
   const queryClient = useQueryClient();
   const { name, contact, picture } = responseInfo(detail);
@@ -95,13 +95,9 @@ const UserInfo: React.FC<WithDetail & { clearId: () => void }> = ({
   }, [candidate]);
 
   const save = (status: "accepted" | "rejected") => {
-    saveCandidate({ ...candidate, status, note }).then(() => {
-      clearId();
+    return saveCandidate({ ...candidate, status, note }).then(() => {
       setNote("");
-      return Promise.all([
-        queryClient.invalidateQueries(["candidates"]),
-        queryClient.refetchQueries(["candidate"]),
-      ]);
+      return queryClient.invalidateQueries(["candidates"]).then(onSave);
     });
   };
 
@@ -154,11 +150,11 @@ const User: React.FC<{ id: number | undefined; clearId: () => void }> = ({
   id,
   clearId,
 }) => {
-  /* Setting a fake id takes care of initial load */
-  const prevId = useRef<number | undefined>(-1);
-  const { status, data, error, refetch } = useQuery(
-    ["candidate", id],
-    ({ queryKey }) => {
+  const queryClient = useQueryClient();
+  const [forceReload, setForceReload] = useState<number>(0);
+  const { status, data, error, refetch } = useQuery({
+    queryKey: ["candidate", id],
+    queryFn: ({ queryKey }) => {
       const [_, id] = queryKey;
       if (id) {
         return candidateById(id as number);
@@ -166,18 +162,22 @@ const User: React.FC<{ id: number | undefined; clearId: () => void }> = ({
         return newCandidate();
       }
     },
-    {
-      /* Don't automatically reload, since the URL is the same for multiple candidates */
-      enabled: false,
-    }
-  );
+    /* Don't automatically reload, since the URL is the same for multiple candidates */
+    enabled: false,
+  });
   if (error) {
     console.error(error);
   }
-  /* TODO: make both id and not ID state work */
+  /* Handles initial load and getting new candidates */
   useEffect(() => {
-    if (id !== prevId.current) {
-      prevId.current = id;
+    refetch();
+  }, [forceReload]);
+
+  /* Handles id prop change from selections */
+  const prevId = useRef<number>();
+  useEffect(() => {
+    if (prevId.current !== id) {
+      prevId.current = id!;
       refetch();
     }
   }, [id]);
@@ -187,7 +187,20 @@ const User: React.FC<{ id: number | undefined; clearId: () => void }> = ({
     <div className="w-[400px] h-[504px]">Loading</div>
   ) : (
     <div>
-      <UserInfo clearId={clearId} {...data!} />
+      <UserInfo
+        onSave={() => {
+          if (id) {
+            /* Prevent flashing when it reuses state from an undefined ID */
+            queryClient.removeQueries({
+              queryKey: ["candidate", undefined],
+            });
+            clearId();
+          } else {
+            setForceReload(forceReload + 1);
+          }
+        }}
+        {...data!}
+      />
     </div>
   );
 };
