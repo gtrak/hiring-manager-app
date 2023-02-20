@@ -1,13 +1,14 @@
 import { describe, it, expect, vi } from "vitest";
 import UserList from "../src/UserList";
 import User from "../src/User";
-import { findByText, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import {
   ContextOptions,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
+import { saveCandidate, UserModel } from "../src/api";
 
 const testQueryClient = () =>
   new QueryClient({
@@ -40,6 +41,8 @@ export function renderWithClient(
       ),
   } as any;
 }
+
+const saved: { input: UserModel; output: UserModel }[] = [];
 
 vi.mock("../src/api", async (importOriginal) => {
   const mod: any = await importOriginal();
@@ -172,6 +175,20 @@ vi.mock("../src/api", async (importOriginal) => {
         },
       };
     },
+    saveCandidate: (candidate: UserModel) => {
+      expect(candidate).toEqual({
+        email: "jeffbyid.hudson@example.com",
+        first_name: "Jeff",
+        last_name: "Hudson",
+        note: "My special note",
+        phone: "031-933-0120",
+        seed: "9f6fdcd547e5409b",
+        status: "accepted",
+      });
+      const output = { ...candidate, id: 0 };
+      saved.push({ input: candidate, output });
+      return Promise.resolve(output);
+    },
   };
 });
 
@@ -243,5 +260,16 @@ describe("User", () => {
     expect(
       await screen.findByText(/jeffbyid.hudson@example.com/)
     ).toBeInTheDocument();
+    const note = screen.getByRole("textbox");
+    expect(note.getAttribute("placeholder")).toEqual("Add an optional note");
+    fireEvent.change(note, { target: { value: "My special note" } });
+    expect(note.getAttribute("value")).toEqual("My special note");
+    fireEvent.click(screen.getByText(/Accept/));
+    expect(saved[0].output.id).toBe(0);
+    expect(saved[0].output.note).toBe("My special note");
+    expect(cleared).toEqual(0);
+    await waitFor(() => {
+      expect(cleared).toEqual(1);
+    });
   });
 });
