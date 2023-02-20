@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
-import { useQuery, useQueryClient } from "react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { candidateById, newCandidate, saveCandidate, WithDetail } from "./api";
 
 export const mockResponse = {
@@ -99,8 +99,8 @@ const UserInfo: React.FC<WithDetail & { clearId: () => void }> = ({
       clearId();
       setNote("");
       return Promise.all([
-        queryClient.invalidateQueries("candidates"),
-        queryClient.refetchQueries("candidate"),
+        queryClient.invalidateQueries(["candidates"]),
+        queryClient.refetchQueries(["candidate"]),
       ]);
     });
   };
